@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server --mode development",
-    "prod": "webpack --mode production",
-    "start": "node index.js"
+    "devWebpack": "webpack-dev-server --mode development",
+    "prodWebpack": "webpack --mode production",
+    "start": "node index",
+    "dev": "nodemon index"
   },
   "browserslist": [
     "> 1%",
@@ -29,6 +30,7 @@
     "imagemin-webpack-plugin": "^2.4.2",
     "mini-css-extract-plugin": "^0.7.0",
     "node-sass": "^4.12.0",
+    "nodemon": "^1.19.1",
     "postcss-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",

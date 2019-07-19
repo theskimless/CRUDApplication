@@ -1,13 +1,10 @@
 function _(data) { console.log(data) }
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
+const path = require("path");
 const express = require("express");
 const app = express();
 
-// const http = require("http").Server(app);
-
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.listen(PORT, () => _(PORT));
