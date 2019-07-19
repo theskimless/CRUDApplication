@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+<link href="css/app.css" rel="stylesheet"></head>
+<body>
+  <div class="container" id="app">
+    <!-- HEADER PROFILE -->
+    <transition name="popup" mode="out-in">
+      <div class="header-profile" v-if="profile.isAuthenticated" :key="1">
+        <div class="header-profile-img"><img :src="profile.photoUrl" alt=""></div>
+        <div class="header-profile-info">
+          <div>{{profile.name}}</div>
+          <div>{{profile.email}}</div>
+        </div>
+      </div>
+      <button class="header-profile-login-btn" v-else :key="2" @click="loginBtn">Log in</button>
+    </transition>
+    
+    <!-- ADD/EDIT WORD FORM -->
+    <transition name="fade">
+      <div class="fade-wrapper" v-if="isWordFormShowed">
+        <transition name="popup" appear>
+          <word-form 
+            v-if="isWordFormShowed" 
+            @on-close="hideWordForm" 
+            @on-reload="reload" 
+            :word-obj="editedWordForm" 
+            :form-mode="wordFormMode" 
+            :word-id="editedWordId"
+          >
+          </word-form>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- PAGE MODE BTNS -->
+    <div class="page-mode-wrap" :class="{'page-mode-wrap_active': mainPageMode === 1, 'page-mode-wrap_activeA': mainPageMode === 0}">
+      <button class="page-mode-btn" @click="mainPageMode = 0">Your lists</button>
+      <button class="page-mode-btn" @click="mainPageMode = 1">All words</button>
+    </div>
+
+    <!-- YOUR LISTS -->
+    <transition name="popup-fade">
+      <div v-if="mainPageMode === 0">
+        
+        <!-- TEST -->
+        <transition name="fade">
+            <div class="fade-wrapper" v-if="isTestShowed">
+              <transition name="popup" appear>
+                <test 
+                  v-if="isTestShowed" 
+                  :list-obj="selectedList" 
+                  :all-words="profile.words" 
+                  :u-id="profile.uId" 
+                  @on-close="hideTest"
+                  @on-reload="reload"
+                ></test>
+              </transition>
+            </div>
+          </transition>
+
+        <!-- CREATE NEW LIST -->
+        <div class="lists-create-form">
+          <input type="text" class="lists-create-form__inp" placeholder="Create new list" v-model="newListInp">
+          <button 
+            type="button" 
+            class="round-img-btn add-list-form-btn" 
+            :class="{'add-list-form-btn_unactive': !isNewListInpActive}" 
+            @click="createNewList"
+          ></button>
+        </div>
+
+        <!-- LIST FORM -->
+        <transition name="fade">
+          <div class="fade-wrapper" v-if="isListFormShowed">
+            <transition name="popup" appear>
+              <list-form 
+                v-if="isListFormShowed" 
+                :list-obj="selectedList" 
+                :words="profile.words" 
+                :u-id="profile.uId" 
+                @on-close="hideListForm"
+                @on-reload="reload"
+              ></list-form>
+            </transition>
+          </div>
+        </transition>
+
+        <!-- LIST -->
+        <transition name="fade">
+          <div class="fade-wrapper" v-if="isListShowed">
+            <transition name="popup" appear>
+              <list 
+                v-if="isListShowed" 
+                :list-obj="selectedList" 
+                :words="profile.words" 
+                @on-close="hideList"
+              ></list>
+            </transition>
+          </div>
+        </transition>
+
+        <!-- LISTS -->
+        <div class="word-wrapper" v-for="(list, key) in profile.lists">
+          <div  class="word list-item block block_styled" @click="showList(list)">
+            {{list.name}}
+          </div>
+          <button type="button" class="text-btn" @click="startTest(list)">TEST</button>
+          <button type="button" class="round-img-btn word-func-edit" @click="listEdit(list)"></button>
+          <button type="button" class="round-img-btn word-func-del" @click="listDelete(list.id)"></button>
+        </div>
+      </div>
+
+    </transition>
+
+    <!-- ALL WORDS -->
+    <transition name="popup-fade">
+      <div v-if="mainPageMode === 1">
+
+        <!-- HEADER SEARCH -->
+        <div class="header block">
+          <input class="search-inp" type="text" v-model="wordsSearch">
+          <transition name="popup"><button type="button" class="round-img-btn show-add-word-form-btn" @click="showWordForm" v-if="isAdmin"></button></transition>
+        </div>
+    
+        <!-- WORD -->
+        <transition name="fade">
+          <div class="fade-wrapper" v-if="isWordShowed">
+            <transition name="popup" appear>
+              <word v-if="isWordShowed" :word-obj="selectedWord" @on-close="isWordShowed = false"></word>
+            </transition>
+          </div>
+        </transition>
+        
+        <!-- ADD TO LIST FORM -->
+        <transition name="popup">
+          <div class="add-to-list-form-wrap" v-if="isAddToListShowed">
+            <div class="block block_styled add-to-list-form">
+              <div 
+                class="add-to-list-form__item"
+                v-for="(list, key) in profile.lists" 
+                :class="{'add-to-list-form__item_unactive': listHasWordAlready(key)}"
+                @click="addToList(key)"
+              >{{list.name}}</div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- WORD SEARCH RESULT -->
+        <transition name="translateY">
+          <div class="word-wrapper" v-if="searchResult !== ''">
+            <div class="word block block_styled">
+              <div class="word-header">
+                <div class="word-header__word">{{searchResult.word}}</div>
+                <div class="word-header__type">{{types[searchResult.type]}}</div>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              class="round-img-btn show-add-word-form-btn" 
+              :class="{'show-add-word-form-btn_unactive': profile.lists.length === 0}" 
+              @click="addToListSelectWord(searchResult)"
+            ></button>
+            <button type="button" class="round-img-btn word-func-edit" v-if="isAdmin" @click="showEditWordForm(searchResult)"></button>
+            <button type="button" class="round-img-btn word-func-del" v-if="isAdmin" @click="wordDelete(searchResult.id)"></button>
+          </div>
+        </transition>
+
+        <!-- WORDS -->
+        <transition-group name="translateY">
+          <div class="word-wrapper" 
+            v-for="(word, key) in words" 
+            :key="word.id" 
+            v-if="(searchResKey === '' || searchResKey[key]) && key >= page * 5 && key < (page+1)*5"  
+          >
+            <div class="word block block_styled" @click="showWord(word)">
+              <div class="word-header">
+                <div class="word-header__word">{{word.word}}</div>
+                <div class="word-header__type">{{types[word.type]}}</div>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              class="round-img-btn show-add-word-form-btn" 
+              :class="{'show-add-word-form-btn_unactive': profile.lists.length === 0}" 
+              @click="addToListSelectWord(word)"
+            ></button>
+            <button type="button" class="round-img-btn word-func-edit" v-if="isAdmin" @click="showEditWordForm(word)"></button>
+            <button type="button" class="round-img-btn word-func-del" v-if="isAdmin" @click="wordDelete(word.id)"></button>
+          </div>
+        </transition-group>
+    
+        <!-- WORDS PAGINATION -->
+        <div class="page-btn-wrap">
+          <button class="page-btn" :class="{'page-btn_unactive': isFirstPage}" @click="prevPage">Previous page</button>
+          <button class="page-btn" :class="{'page-btn_unactive': isLastPage}" @click="nextPage">Next page</button>
+        </div>
+
+      </div>
+    </transition>
+  </div>
+<script type="text/javascript" src="js/app.js"></script></body>
+</html>
