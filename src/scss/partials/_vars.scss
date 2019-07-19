@@ -1,0 +1,12 @@
+// COLORS
+$bg-color: #f6f6f6;
+$main-el-bg-color: #fff;
+$sub-color: #4285f4;
+
+// VARS
+$mainRad: 6px;
+
+// MIXINS
+@mixin element-shadow {
+  box-shadow: 0 0 10px rgba(0,0,0,.08);
+}

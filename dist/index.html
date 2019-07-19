@@ -5,11 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-</head>
+<link href="css/app.css" rel="stylesheet"></head>
 <body>
-  <div>
-    LIST5
+  <div class="container" id="app">
+    <!-- <div @click="show">AAAAAAAAAA</div> -->
+    <!-- HEADER PROFILE -->
+    <transition name="popup" mode="out-in">
+      <div class="header-profile" v-if="profile.isAuthenticated" :key="1">
+        <div class="header-profile-img"><img :src="profile.photoUrl" alt=""></div>
+        <div class="header-profile-info">
+          <div>{{profile.name}}</div>
+          <div>{{profile.email}}</div>
+        </div>
+      </div>
+      <button class="header-profile-login-btn" v-else :key="2" @click="loginBtn">Log in</button>
+    </transition>
+    
+    <!-- ADD WORD FORM -->
+    <transition name="fade">
+      <div class="fade-wrapper" v-if="isWordFormShowed">
+        <transition name="popup" appear>
+          <add-word-comp v-if="isWordFormShowed" @on-close="hideWordForm" :word-obj="editedWordForm" :form-mode="wordFormMode" :word-id="editedWordId"></add-word-comp>
+        </transition>
+      </div>
+    </transition>
+
+    <!-- HEADER -->
+    <div class="header block">
+      <input class="search-inp" type="text" v-model="wordsSearch">
+      <transition name="popup"><button type="button" class="round-img-btn show-add-word-form-btn" @click="showWordForm" v-if="isAdmin"></button></transition>
+    </div>
+
+    <!-- WORDS -->
+    <!-- v-if="word.word.search(wordsSearch) !== -1" -->
+
+    <div class="word-wrapper" v-if="searchResult !== ''">
+        <div class="word block block_styled">
+            <div class="word-header">
+              <div class="word-header__word">{{searchResult.word}}</div>
+              <div class="word-header__type">{{types[searchResult.type]}}</div>
+            </div>
+            <!-- <div class="word-def" v-if="word.definitions[0] !== ''">{{word.definitions[0]}}</div> -->
+          </div>
+          <button type="button" class="round-img-btn word-func-edit" v-if="isAdmin" @click="showEditWordForm(searchResult)"></button>
+          <button type="button" class="round-img-btn word-func-del" v-if="isAdmin" @click="wordDelete(searchResult.id)"></button>
+      </div>
+    <div class="word-wrapper" v-for="(word, key) in words" v-if="searchResKey === '' || searchResKey[key]">
+      <div class="word block block_styled">
+          <div class="word-header">
+            <div class="word-header__word">{{word.word}}</div>
+            <div class="word-header__type">{{types[word.type]}}</div>
+          </div>
+          <!-- <div class="word-def" v-if="word.definitions[0] !== ''">{{word.definitions[0]}}</div> -->
+        </div>
+        <button type="button" class="round-img-btn word-func-edit" v-if="isAdmin" @click="showEditWordForm(word)"></button>
+        <button type="button" class="round-img-btn word-func-del" v-if="isAdmin" @click="wordDelete(word.id)"></button>
+    </div>
+    <div class="page-btn-wrap">
+      <button class="page-btn" @click="prevPage">Previous page</button>
+      <button class="page-btn" @click="nextPage">Next page</button>
+    </div>
   </div>
-  <button>CLICK</button>
 <script type="text/javascript" src="js/app.js"></script></body>
 </html>
