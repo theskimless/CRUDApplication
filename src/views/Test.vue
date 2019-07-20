@@ -65,7 +65,7 @@ export default {
     },
     chooseAnswer(chosenAnswer, key) {
       if(chosenAnswer === this.answer.word) {
-        this.answer.coeff--;
+        if(this.answer.coeff > 1) this.answer.coeff--;
         this.$set(this.answersState, key, 1);
         this.isAnswered = true;
       }
