@@ -113,7 +113,15 @@ export default {
       this.answers = answers;
     },
     finish() {
-      console.log(this.words);
+      for(let i = 0; i < this.words.length; i++) {
+        db.collection("users").doc(this.uId).collection("words").doc(this.words[i].id)
+          .update({
+            coeff: this.words[i].coeff 
+          })
+          .then(() => {
+            if(i === this.words.length - 1) this.$emit("on-reload");
+          });
+      }
     }
   },
   mounted() {
